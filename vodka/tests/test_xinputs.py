@@ -3,7 +3,7 @@
 from unittest import TestCase
 from xml.etree import ElementTree
 
-from vodka.xinputs import InputInput, Select1Input
+from vodka.xinputs import XFormsInput, InputInput, Select1Input
 
 
 EXAMPLE1 = """
@@ -38,6 +38,11 @@ class TestInputInput(TestCase):
         self.assertEqual("jr:itext('/data/Name:label')", inp.label_ref)
         self.assertEqual("jr:itext('/data/Name:hint')", inp.hint_ref)
 
+    def test_from_element(self):
+        input_elem = ElementTree.fromstring(EXAMPLE1)
+        inp = XFormsInput.from_element(input_elem)
+        self.assertEqual(inp.__class__, InputInput)
+
 
 class TestSelect1Input(TestCase):
 
@@ -50,3 +55,8 @@ class TestSelect1Input(TestCase):
         self.assertEqual("jr:itext('/data/Favourite cheese:hint')",
                          inp.hint_ref)
         self.assertEqual(['gouda', 'cheddar'], inp.get_values())
+
+    def test_from_element(self):
+        input_elem = ElementTree.fromstring(EXAMPLE2)
+        inp = XFormsInput.from_element(input_elem)
+        self.assertEqual(inp.__class__, Select1Input)
