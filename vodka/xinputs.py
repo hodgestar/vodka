@@ -4,6 +4,8 @@
 XForms input implementations.
 """
 
+from vodka.methanol import xforms
+
 
 def get_child_attr(elem, child_tag, attr):
     """Utility method for retrieving attributes of child elements"""
@@ -34,8 +36,8 @@ class XFormsInput(object):
     def __init__(self, elem):
         self.elem = elem
         self.ref = elem.get('ref')
-        self.label_ref = get_child_attr(elem, 'label', 'ref')
-        self.hint_ref = get_child_attr(elem, 'hint', 'ref')
+        self.label_ref = get_child_attr(elem, xforms.label, 'ref')
+        self.hint_ref = get_child_attr(elem, xforms.hint, 'ref')
 
     @classmethod
     def register_subclass(cls, tag, othercls):
@@ -48,26 +50,23 @@ class XFormsInput(object):
 
 
 class InputInput(XFormsInput):
-    tag = 'input'
+    tag = xforms.input
 
 
 class OptionItem(object):
     def __init__(self, elem):
         self.elem = elem
         self.ref = elem.get('ref')
-        self.value = elem.findtext('value')
-        self.label_ref = get_child_attr(elem, 'label', 'ref')
+        self.value = elem.findtext(xforms.value)
+        self.label_ref = get_child_attr(elem, xforms.label, 'ref')
 
 
 class Select1Input(XFormsInput):
-    tag = 'select1'
+    tag = xforms.select1
 
     def __init__(self, elem):
         super(Select1Input, self).__init__(elem)
-        self.items = []
-        for child in elem:
-            if child.tag == 'item':
-                self.items.append(OptionItem(child))
+        self.items = [OptionItem(item) for item in elem.findall(xforms.item)]
 
     def get_values(self):
         return [item.value for item in self.items]

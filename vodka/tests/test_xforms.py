@@ -48,8 +48,11 @@ class TestOdkForm(unittest.TestCase):
 
     def test_create_form_from_string(self):
         odk = OdkForm(EXAMPLE1)
-        raise ValueError()
+        first_input = odk.inputs[0]
+        self.assertEqual(first_input.ref, '/data/Name')
 
     def test_create_form_from_fileobj(self):
         fileobj = StringIO(EXAMPLE1)
         odk = OdkForm(fileobj)
+        first_input = odk.inputs[0]
+        self.assertEqual(first_input.ref, '/data/Name')

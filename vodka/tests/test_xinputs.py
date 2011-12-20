@@ -4,17 +4,20 @@ from unittest import TestCase
 from xml.etree import ElementTree
 
 from vodka.xinputs import XFormsInput, InputInput, Select1Input
+from vodka.methanol import xforms
 
 
 EXAMPLE1 = """
-<input ref="/data/Name">
+<input xmlns="%(ns)s" ref="/data/Name">
   <label ref="jr:itext('/data/Name:label')"/>
   <hint ref="jr:itext('/data/Name:hint')"/>
 </input>
-"""
+""" % {
+'ns': xforms.DEFAULT_NS,
+}
 
 EXAMPLE2 = """
-<select1 ref="/data/Favourite cheese">
+<select1 xmlns="%(ns)s" ref="/data/Favourite cheese">
   <label ref="jr:itext('/data/Favourite cheese:label')"/>
   <hint ref="jr:itext('/data/Favourite cheese:hint')"/>
   <item>
@@ -26,7 +29,9 @@ EXAMPLE2 = """
     <value>cheddar</value>
   </item>
 </select1>
-"""
+""" % {
+'ns': xforms.DEFAULT_NS,
+}
 
 
 class TestInputInput(TestCase):
