@@ -1,0 +1,7 @@
+/pip-log.txt
+*.pyc
+*.swp
+/_trial_temp/*
+.DS_Store
+*.egg-info
+/pep8.txt
