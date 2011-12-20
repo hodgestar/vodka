@@ -6,9 +6,9 @@ XForms document types.
 For now, just ODK forms.
 """
 
-from vodka.xtypes import XFormsModel
+from vodka.xmodels import XFormsModel
 from vodka.xinputs import XFormsInput
-from vodka.methanol import fromstring, parse, html
+from vodka.methanol import fromstring, parse, html, xforms
 
 
 class OdkForm(object):
@@ -26,7 +26,7 @@ class OdkForm(object):
         else:
             # assume it's an Element instance
             doc = source
-        # self.model = XFormsModel(doc.find('model'))
+        self.model = XFormsModel(doc.find("*/" + xforms.model))
         # import pdb; pdb.set_trace()
         self.inputs = [XFormsInput.from_element(elem)
                        for elem in doc.find(html.body)]
