@@ -7,3 +7,6 @@
 /pep8.txt
 /ve
 /build
+/.coverage
+/coverage.xml
+/test_results.xml
