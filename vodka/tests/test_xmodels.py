@@ -3,7 +3,7 @@
 from unittest import TestCase
 
 from vodka.methanol import fromstring
-from vodka.xmodels import XFormsModel
+from vodka.xmodels import XFormsModel, XFormsInstance
 
 
 EXAMPLE1 = """
@@ -51,6 +51,18 @@ EXAMPLE1 = """
 </model>
 """
 
+EXAMPLE2 = """
+<instance>
+  <data id="build_Untitled-Form_1323432952">
+    <Name foo="bar">
+      Joe Blogs
+    </Name>
+    <Cell_number/>
+    <Favourite_cheese/>
+  </data>
+</instance>
+"""
+
 
 class TestXFormsModel(TestCase):
 
@@ -65,3 +77,9 @@ class TestXFormsModel(TestCase):
         instance = model.get_new_instance()
         self.assertEqual('Joe Blogs',
                          instance.find('/data/Name').text.strip())
+
+    def test_elem_path(self):
+        get_cpath = XFormsInstance(EXAMPLE2)._get_canonical_path
+        self.assertEqual('/data/Name', get_cpath('/data/Name'))
+        self.assertEqual('/data/Name', get_cpath('/data/Name/'))
+        self.assertEqual(None, get_cpath('/data/foo'))
