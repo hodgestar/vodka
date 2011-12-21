@@ -24,15 +24,20 @@ class XFormsInstance(object):
     def find(self, path):
         return self.doc.find(path)
 
+    def _get_canonical_path(self, path):
+        if self.find(path) is not None:
+            return path.rstrip('/')
+        return None
+
 
 class XFormsModel(object):
     def __init__(self, elem):
         self.elem = elem
-        self.bindings = []
         # the namespace should probably be openrosa
         # but ODK shoves it into the XForms namespace
         self.itext = IText(copy_elem(elem.find(xforms.itext),
                                      strip_namespace=True))
+        self.bindings = []
 
     def get_new_instance(self):
         """
