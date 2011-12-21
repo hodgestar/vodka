@@ -39,6 +39,9 @@ class XFormsInput(object):
         self.label_ref = get_child_attr(elem, xforms.label, 'ref')
         self.hint_ref = get_child_attr(elem, xforms.hint, 'ref')
 
+    def get_type_params(self):
+        return {}
+
     @classmethod
     def register_subclass(cls, tag, othercls):
         cls.REGISTRY[tag] = othercls
@@ -66,6 +69,9 @@ class Select1Input(XFormsInput):
     def __init__(self, elem):
         super(Select1Input, self).__init__(elem)
         self.items = [OptionItem(item) for item in elem.findall(xforms.item)]
+
+    def get_type_params(self):
+        return {'items': self.get_values()}
 
     def get_values(self):
         return [item.value for item in self.items]
