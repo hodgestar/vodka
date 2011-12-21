@@ -17,13 +17,14 @@ def parse_options():
 def main(options, args):
     with open(args[0], "rb") as xform_file:
         form = OdkForm(xform_file)
-    lang = options.lang
+    translator = form.model.itext.translator(options.lang)
 
-    print "Running '%s' [language: %s]" % (form.title, lang)
+    print "Running '%s' [language: %s]" % (form.title, options.lang)
     print "----"
 
     for input in form.inputs:
-        print input
+        print translator(input.label_ref)
+        print "  Hint:", translator(input.hint_ref)
 
 
 if __name__ == "__main__":
