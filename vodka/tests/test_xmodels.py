@@ -2,9 +2,8 @@
 
 from unittest import TestCase
 
-from vodka.methanol import fromstring, xforms
-from vodka.xmodels import XFormsModel, XFormsInstance
-from vodka.xinputs import XFormsInput
+from vodka.methanol import fromstring
+from vodka.xmodels import XFormsModel
 
 
 EXAMPLE1 = """
@@ -55,76 +54,68 @@ EXAMPLE1 = """
 EXAMPLE2 = """
 <instance>
   <data id="build_Untitled-Form_1323432952">
-    <Name foo="bar">
-      Joe Blogs
-    </Name>
+    <Name>John Doe</Name>
     <Cell_number/>
-    <Favourite_cheese/>
+    <Favourite_cheese>gouda</Favourite_cheese>
   </data>
 </instance>
 """
 
-EXAMPLE3 = """
-<input xmlns="%(ns)s" ref="/data/Name">
-  <label ref="jr:itext('/data/Name:label')"/>
-  <hint ref="jr:itext('/data/Name:hint')"/>
-</input>
-""" % {
-'ns': xforms.DEFAULT_NS,
-}
-
-EXAMPLE4 = """
-<select1 xmlns="%(ns)s" ref="/data/Favourite_cheese">
-  <label ref="jr:itext('/data/Favourite_cheese:label')"/>
-  <hint ref="jr:itext('/data/Favourite_cheese:hint')"/>
-  <item>
-    <label ref="jr:itext('/data/Favourite_cheese:option0')"/>
-    <value>gouda</value>
-  </item>
-  <item>
-    <label ref="jr:itext('/data/Favourite_cheese:option1')"/>
-    <value>cheddar</value>
-  </item>
-</select1>
-""" % {
-'ns': xforms.DEFAULT_NS,
-}
-
 
 class TestXFormsModel(TestCase):
 
+    def setUp(self):
+        self.model = XFormsModel(fromstring(EXAMPLE1))
+
     def test_model(self):
-        model = XFormsModel(fromstring(EXAMPLE1))
-        translator = model.itext.translator('eng')
+        translator = self.model.itext.translator('eng')
         self.assertEqual(translator("jr:itext('/data/Name:label')"),
                          "Enter your full name")
-        model._process_bindings()
+        self.model._process_bindings()
 
     def test_instance(self):
-        model = XFormsModel(fromstring(EXAMPLE1))
-        instance = model.get_new_instance()
+        instance = self.model.get_instance()
         self.assertEqual('Joe Blogs',
                          instance.find('/data/Name').text.strip())
 
     def test_elem_path(self):
-        get_cpath = XFormsInstance(EXAMPLE2).get_canonical_path
+        instance = self.model.get_instance()
+        get_cpath = instance.get_canonical_path
         self.assertEqual('/data/Name', get_cpath('/data/Name'))
         self.assertEqual('/data/Name', get_cpath('/data/Name/'))
         self.assertEqual(None, get_cpath('/data/foo'))
 
     def test_input_input(self):
-        model = XFormsModel(fromstring(EXAMPLE1))
-        instance = model.get_new_instance()
-        inp = XFormsInput.from_element(fromstring(EXAMPLE3))
+        instance = self.model.get_instance()
         self.assertEqual('Joe Blogs',
                          instance.find('/data/Name').text.strip())
-        model.process_input(instance, inp, "foo")
+        self.model.process_input(instance, '/data/Name', "foo")
         self.assertEqual('foo', instance.find('/data/Name').text.strip())
 
     def test_select1_input(self):
-        model = XFormsModel(fromstring(EXAMPLE1))
-        instance = model.get_new_instance()
-        inp = XFormsInput.from_element(fromstring(EXAMPLE4))
+        instance = self.model.get_instance()
         self.assertEqual(None, instance.find('/data/Favourite_cheese').text)
-        model.process_input(instance, inp, "gouda")
+        self.model.process_input(instance, '/data/Favourite_cheese', "gouda")
         self.assertEqual('gouda', instance.find('/data/Favourite_cheese').text)
+
+    def test_build_instance_from_xml(self):
+        instance = self.model.get_instance(EXAMPLE2)
+        self.assertEqual('John Doe', instance.find('/data/Name').text)
+        self.assertEqual(None, instance.find('/data/Cell_number').text)
+        self.assertEqual('gouda', instance.find('/data/Favourite_cheese').text)
+        self.assertEqual('John Doe', instance.data['data']['Name'])
+        self.assertEqual(None, instance.data['data']['Cell_number'])
+        self.assertEqual('gouda', instance.data['data']['Favourite_cheese'])
+
+    def test_build_instance_from_dict(self):
+        instance = self.model.get_instance({'data': {
+                    'Name': 'John Doe',
+                    'Cell_number': None,
+                    'Favourite_cheese': 'gouda',
+                    }})
+        self.assertEqual('John Doe', instance.find('/data/Name').text)
+        self.assertEqual(None, instance.find('/data/Cell_number').text)
+        self.assertEqual('gouda', instance.find('/data/Favourite_cheese').text)
+        self.assertEqual('John Doe', instance.data['data']['Name'])
+        self.assertEqual(None, instance.data['data']['Cell_number'])
+        self.assertEqual('gouda', instance.data['data']['Favourite_cheese'])

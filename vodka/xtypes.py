@@ -29,21 +29,17 @@ class XFormsType(object):
 
     @classmethod
     def from_name(cls, name):
-        return cls.REGISTRY[name]
+        return cls.REGISTRY[name]()
 
     def __init__(self, params=None):
         self.params = params or {}
         self.value = None
-        self.setup()
 
     def set_value(self, value):
         self.value = self.validate(value)
 
     def get_value(self):
         return self.value
-
-    def setup(self):
-        pass
 
     def validate(self, value):
         raise NotImplementedError()
@@ -66,10 +62,5 @@ class IntType(XFormsType):
 class Select1Type(XFormsType):
     tag = 'select1'
 
-    def setup(self):
-        self.items = self.params['items']
-
     def validate(self, value):
-        if value not in self.items:
-            raise ValueError("Invalid selection.")
         return value
