@@ -26,6 +26,7 @@ class OdkForm(object):
         else:
             # assume it's an Element instance
             doc = source
+        self.title = doc.findtext("%s/%s" % (html.head, html.title))
         self.model = XFormsModel(doc.find("*/" + xforms.model))
         self.inputs = [XFormsInput.from_element(elem)
                        for elem in doc.find(html.body)]

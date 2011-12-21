@@ -48,6 +48,7 @@ class TestOdkForm(unittest.TestCase):
 
     def test_create_form_from_string(self):
         odk = OdkForm(EXAMPLE1)
+        self.assertEqual(odk.title, "Untitled Form")
         first_input = odk.inputs[0]
         self.assertEqual(first_input.ref, '/data/Name')
         self.assertEqual('Joe Blogs',
