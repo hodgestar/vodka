@@ -60,5 +60,5 @@ class TestXFormsModel(TestCase):
         self.assertEqual('Joe Blogs',
                          model.instance.find('/data/Name').text.strip())
         translator = model.itext.translator('eng')
-        self.assertEqual(translator('jr:itext(id("/data/Name:label"))'),
-                         'Enter your full name')
+        self.assertEqual(translator("jr:itext('/data/Name:label')"),
+                         "Enter your full name")

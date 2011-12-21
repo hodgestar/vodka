@@ -18,9 +18,10 @@ class XFormsModel(object):
         instance_elem = copy_elem(elem.find(xforms.instance),
                                   strip_namespace=True)
         self.instance = ElementTree(instance_elem)
-        # TODO: the namespace should probably be openrosa
-        # but this is the namespace ODK gives it
-        self.itext = IText(elem.find(xforms.itext))
+        # the namespace should probably be openrosa
+        # but ODK shoves it into the XForms namespace
+        self.itext = IText(copy_elem(elem.find(xforms.itext),
+                                     strip_namespace=True))
 
 
 class XFormsBinding(object):
