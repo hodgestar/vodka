@@ -2,3 +2,5 @@ coverage
 python-subunit
 junitxml
 pep8
+# for trial
+twisted==10.0.0
