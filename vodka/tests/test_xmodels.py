@@ -54,11 +54,14 @@ EXAMPLE1 = """
 
 class TestXFormsModel(TestCase):
 
-    def test_input(self):
-        model_elem = fromstring(EXAMPLE1)
-        model = XFormsModel(model_elem)
-        self.assertEqual('Joe Blogs',
-                         model.instance.find('/data/Name').text.strip())
+    def test_model(self):
+        model = XFormsModel(fromstring(EXAMPLE1))
         translator = model.itext.translator('eng')
         self.assertEqual(translator("jr:itext('/data/Name:label')"),
                          "Enter your full name")
+
+    def test_instance(self):
+        model = XFormsModel(fromstring(EXAMPLE1))
+        instance = model.get_new_instance()
+        self.assertEqual('Joe Blogs',
+                         instance.find('/data/Name').text.strip())

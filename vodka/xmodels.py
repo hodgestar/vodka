@@ -6,22 +6,39 @@ XForms model thingies.
 
 from xml.etree.ElementTree import ElementTree
 
-from vodka.methanol import xforms, copy_elem
+from vodka.methanol import xforms, copy_elem, fromanything
 from vodka.itext import IText
+
+
+class XFormsInstance(object):
+    """
+    An xforms data instance.
+    """
+
+    def __init__(self, source):
+        # strip namespaces because ODK incorrectly places
+        # all its instance sub-elements in the XForms namespace
+        elem = copy_elem(fromanything(source), strip_namespace=True)
+        self.doc = ElementTree(elem)
+
+    def find(self, path):
+        return self.doc.find(path)
 
 
 class XFormsModel(object):
     def __init__(self, elem):
+        self.elem = elem
         self.bindings = []
-        # strip namespaces because ODK incorrectly places
-        # all its instance sub-elements in the XForms namespace
-        instance_elem = copy_elem(elem.find(xforms.instance),
-                                  strip_namespace=True)
-        self.instance = ElementTree(instance_elem)
         # the namespace should probably be openrosa
         # but ODK shoves it into the XForms namespace
         self.itext = IText(copy_elem(elem.find(xforms.itext),
                                      strip_namespace=True))
+
+    def get_new_instance(self):
+        """
+        Create a new instance object.
+        """
+        return XFormsInstance(self.elem.find(xforms.instance))
 
 
 class XFormsBinding(object):
