@@ -8,7 +8,7 @@ For now, just ODK forms.
 
 from vodka.xmodels import XFormsModel
 from vodka.xinputs import XFormsInput
-from vodka.methanol import fromstring, parse, html, xforms
+from vodka.methanol import fromanything, html, xforms
 
 
 class OdkForm(object):
@@ -19,13 +19,7 @@ class OdkForm(object):
     """
 
     def __init__(self, source):
-        if isinstance(source, basestring):
-            doc = fromstring(source)
-        elif hasattr(source, 'read') and callable(source.read):
-            doc = parse(source)
-        else:
-            # assume it's an Element instance
-            doc = source
+        doc = fromanything(source)
         self.title = doc.findtext("%s/%s" % (html.head, html.title))
         self.model = XFormsModel(doc.find("*/" + xforms.model))
         self.inputs = [XFormsInput.from_element(elem)

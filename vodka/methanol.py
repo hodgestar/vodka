@@ -49,3 +49,12 @@ def fromstring(source):
 def parse(source):
     elem = etree_parse(source)
     return sanitize_namespaces(elem)
+
+
+def fromanything(source):
+    if isinstance(source, basestring):
+        return fromstring(source)
+    elif hasattr(source, 'read') and callable(source.read):
+        return parse(source)
+    # assume it's an Element instance
+    return source
