@@ -4,7 +4,7 @@
 XForms model thingies.
 """
 
-from xml.etree.ElementTree import ElementTree
+from xml.etree.ElementTree import ElementTree, tostring
 
 from vodka.methanol import xforms, copy_elem, fromanything
 from vodka.itext import IText
@@ -21,6 +21,9 @@ class XFormsInstance(object):
         # all its instance sub-elements in the XForms namespace
         elem = copy_elem(fromanything(source), strip_namespace=True)
         self.doc = ElementTree(elem)
+
+    def tostring(self):
+        return tostring(self.doc.getroot())
 
     def find(self, path):
         return self.doc.find(path)

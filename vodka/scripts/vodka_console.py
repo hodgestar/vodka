@@ -1,7 +1,6 @@
 """Script that runs a XForm form in a text console."""
 
 import sys
-import pprint
 from optparse import OptionParser
 
 from vodka.xforms import OdkForm
@@ -20,8 +19,8 @@ def main(options, args):
     with open(args[0], "rb") as xform_file:
         form = OdkForm(xform_file)
     translator = form.model.itext.translator(options.lang)
+    instance = form.model.get_new_instance()
     renderer = SimpleTextRenderer(translator)
-    data = {}
 
     print "Running '%s' [language: %s]" % (form.title, options.lang)
     print "----"
@@ -29,11 +28,12 @@ def main(options, args):
     for input in form.inputs:
         print renderer.render(input)
         response = raw_input("> ")
-        data[input.ref] = renderer.parse(input, response)
+        response = renderer.parse(input, response)
+        form.model.process_input(instance, input, response)
 
     print "----"
     print "Results: "
-    pprint.pprint(data)
+    print instance.tostring()
 
 
 if __name__ == "__main__":
