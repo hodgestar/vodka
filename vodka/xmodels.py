@@ -61,13 +61,22 @@ class XFormsInstance(object):
                     value = xtype.validate(value)
                 data[child.tag] = value
 
-    def tostring(self):
+    def to_xml(self):
         return tostring(self.doc.getroot())
+
+    def to_dict(self):
+        return deepcopy(self.data)
 
     def find(self, path):
         return self.doc.find(path)
 
     def set_data(self, path, value):
+        keys = path.strip('/').split('/')
+        key = keys.pop()
+        data = self.data
+        for k in keys:
+            data = data[k]
+        data[key] = value
         self.find(path).text = str(value)
 
     def get_canonical_path(self, path):

@@ -89,14 +89,18 @@ class TestXFormsModel(TestCase):
         instance = self.model.get_instance()
         self.assertEqual('Joe Blogs',
                          instance.find('/data/Name').text.strip())
+        self.assertEqual('Joe Blogs', instance.data['data']['Name'].strip())
         self.model.process_input(instance, '/data/Name', "foo")
         self.assertEqual('foo', instance.find('/data/Name').text.strip())
+        self.assertEqual('foo', instance.data['data']['Name'].strip())
 
     def test_select1_input(self):
         instance = self.model.get_instance()
         self.assertEqual(None, instance.find('/data/Favourite_cheese').text)
+        self.assertEqual(None, instance.data['data']['Favourite_cheese'])
         self.model.process_input(instance, '/data/Favourite_cheese', "gouda")
         self.assertEqual('gouda', instance.find('/data/Favourite_cheese').text)
+        self.assertEqual('gouda', instance.data['data']['Favourite_cheese'])
 
     def test_build_instance_from_xml(self):
         instance = self.model.get_instance(EXAMPLE2)
