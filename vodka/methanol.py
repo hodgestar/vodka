@@ -7,6 +7,7 @@ Utilities for fixing ElementTree's namespace assumptions.
 from xml.etree.ElementTree import QName
 from xml.etree.ElementTree import fromstring as etree_fromstring
 from xml.etree.ElementTree import parse as etree_parse
+from xml.etree.ElementTree import tostring as etree_tostring
 
 
 class SemanticNamespace(object):
@@ -22,6 +23,16 @@ class SemanticNamespace(object):
 
 html = SemanticNamespace("http://www.w3.org/1999/xhtml", [])
 xforms = SemanticNamespace("http://www.w3.org/2002/xforms", [])
+openrosa = SemanticNamespace("http://openrosa.org/javarosa", [])
+
+
+def copy_elem(elem, strip_namespace=False):
+    new_elem = etree_fromstring(etree_tostring(elem))
+    if strip_namespace:
+        for sub_elem in new_elem.getiterator():
+            # strip the namespace from the fully qualified tag name
+            sub_elem.tag = sub_elem.tag.split('}')[-1]
+    return new_elem
 
 
 def sanitize_namespaces(elem):

@@ -4,28 +4,23 @@
 XForms model thingies.
 """
 
-from StringIO import StringIO
-from xml.etree import ElementTree
+from xml.etree.ElementTree import ElementTree
 
-from vodka.methanol import xforms
-
-
-def make_new_tree(elem, strip_namespace=True):
-    xml = StringIO()
-    ElementTree.ElementTree(elem).write(xml)
-    new_elem = ElementTree.fromstring(xml.getvalue())
-    if strip_namespace:
-        for sub_elem in new_elem.getiterator():
-            # When we get the element here, the namespace has been replaced.
-            sub_elem.tag = sub_elem.tag.split('}')[-1]
-    return ElementTree.ElementTree(new_elem)
+from vodka.methanol import xforms, copy_elem
+from vodka.itext import IText
 
 
 class XFormsModel(object):
     def __init__(self, elem):
         self.bindings = []
-        self.instance = make_new_tree(elem.find(xforms.instance))
-        self.itext = None
+        # strip namespaces because ODK incorrectly places
+        # all its instance sub-elements in the XForms namespace
+        instance_elem = copy_elem(elem.find(xforms.instance),
+                                  strip_namespace=True)
+        self.instance = ElementTree(instance_elem)
+        # TODO: the namespace should probably be openrosa
+        # but this is the namespace ODK gives it
+        self.itext = IText(elem.find(xforms.itext))
 
 
 class XFormsBinding(object):
