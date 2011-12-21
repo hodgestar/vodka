@@ -27,6 +27,5 @@ class OdkForm(object):
             # assume it's an Element instance
             doc = source
         self.model = XFormsModel(doc.find("*/" + xforms.model))
-        # import pdb; pdb.set_trace()
         self.inputs = [XFormsInput.from_element(elem)
                        for elem in doc.find(html.body)]
