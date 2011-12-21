@@ -11,12 +11,18 @@ class FormRenderer(object):
     def __init__(self, translator):
         self.translator = translator
 
+    def _input_name(self, input):
+        name = input.__class__.__name__.lower()
+        if name.endswith("input"):
+            name = name[:-len("input")]
+        return name
+
     def _get_render(self, input):
-        render_name = "render_%s" % input
+        render_name = "render_%s" % self._input_name(input)
         return getattr(self, render_name, self.render_default)
 
     def _get_parse(self, input):
-        parser_name = "parse_%s" % input
+        parser_name = "parse_%s" % self._input_name(input)
         return getattr(self, parser_name, self.parse_default)
 
     def render(self, input):
@@ -51,3 +57,13 @@ class SimpleTextRenderer(FormRenderer):
 
     def parse_default(self, input, response):
         return response
+
+    def render_select1(self, input):
+        lines = [self.render_default(input)]
+        for i, item in enumerate(input.items):
+            lines.append("%d. %s" % (i + 1, self.translator(item.label_ref)))
+        return "\n".join(lines)
+
+    def parse_select1(self, input, response):
+        i = int(response) - 1
+        return input.items[i].value

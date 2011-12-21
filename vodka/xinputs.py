@@ -56,7 +56,6 @@ class InputInput(XFormsInput):
 class OptionItem(object):
     def __init__(self, elem):
         self.elem = elem
-        self.ref = elem.get('ref')
         self.value = elem.findtext(xforms.value)
         self.label_ref = get_child_attr(elem, xforms.label, 'ref')
 
