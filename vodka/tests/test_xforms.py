@@ -51,8 +51,6 @@ class TestOdkForm(unittest.TestCase):
         self.assertEqual(odk.title, "Untitled Form")
         first_input = odk.inputs[0]
         self.assertEqual(first_input.ref, '/data/Name')
-        self.assertEqual('Joe Blogs',
-                         odk.model.instance.find('/data/Name').text.strip())
         translator = odk.model.itext.translator('eng')
         self.assertEqual(translator("jr:itext('/data/Name:label')"),
                          "Enter your full name")
