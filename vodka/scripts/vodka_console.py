@@ -19,21 +19,21 @@ def main(options, args):
     with open(args[0], "rb") as xform_file:
         form = OdkForm(xform_file)
     translator = form.model.itext.translator(options.lang)
-    instance = form.model.get_new_instance()
+    instance = form.model.get_instance()
     renderer = SimpleTextRenderer(translator)
 
     print "Running '%s' [language: %s]" % (form.title, options.lang)
     print "----"
 
-    for input in form.inputs:
-        print renderer.render(input)
+    for xinput in form.inputs:
+        print renderer.render(xinput)
         response = raw_input("> ")
-        response = renderer.parse(input, response)
-        form.model.process_input(instance, input, response)
+        response = renderer.parse(xinput, response)
+        form.model.process_input(instance, xinput.ref, response)
 
     print "----"
     print "Results: "
-    print instance.tostring()
+    print instance.to_xml()
 
 
 if __name__ == "__main__":
