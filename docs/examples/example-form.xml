@@ -4,64 +4,64 @@
     <model>
       <instance>
         <data id="build_Untitled-Form_1323432952">
-          <Name>
+          <name>
             Joe Blogs
-          </Name>
-          <Cell number/>
-          <Favourite cheese/>
+          </name>
+          <cell_number/>
+          <favourite_cheese/>
         </data>
       </instance>
       <itext>
         <translation lang="eng">
-          <text id="/data/Name:label">
+          <text id="/data/name:label">
             <value>Enter your full name</value>
           </text>
-          <text id="/data/Name:hint">
+          <text id="/data/name:hint">
             <value/>
           </text>
-          <text id="/data/Cell number:label">
+          <text id="/data/cell_number:label">
             <value>Enter your phone number</value>
           </text>
-          <text id="/data/Cell number:hint">
+          <text id="/data/cell_number:hint">
             <value/>
           </text>
-          <text id="/data/Favourite cheese:label">
+          <text id="/data/favourite_cheese:label">
             <value>Select your favourite cheese</value>
           </text>
-          <text id="/data/Favourite cheese:hint">
+          <text id="/data/favourite_cheese:hint">
             <value/>
           </text>
-          <text id="/data/Favourite cheese:option0">
+          <text id="/data/favourite_cheese:option0">
             <value>Gouda</value>
           </text>
-          <text id="/data/Favourite cheese:option1">
+          <text id="/data/favourite_cheese:option1">
             <value>Cheddar</value>
           </text>
         </translation>
       </itext>
-      <bind nodeset="/data/Name" type="string" required="true()"/>
-      <bind nodeset="/data/Cell number" type="int"/>
-      <bind nodeset="/data/Favourite cheese" type="select1"/>
+      <bind nodeset="/data/name" type="string" required="true()"/>
+      <bind nodeset="/data/cell_number" type="int"/>
+      <bind nodeset="/data/favourite_cheese" type="select1"/>
     </model>
   </h:head>
   <h:body>
-    <input ref="/data/Name">
-      <label ref="jr:itext('/data/Name:label')"/>
-      <hint ref="jr:itext('/data/Name:hint')"/>
+    <input ref="/data/name">
+      <label ref="jr:itext('/data/name:label')"/>
+      <hint ref="jr:itext('/data/name:hint')"/>
     </input>
-    <input ref="/data/Cell number">
-      <label ref="jr:itext('/data/Cell number:label')"/>
-      <hint ref="jr:itext('/data/Cell number:hint')"/>
+    <input ref="/data/cell_number">
+      <label ref="jr:itext('/data/cell_number:label')"/>
+      <hint ref="jr:itext('/data/cell_number:hint')"/>
     </input>
-    <select1 ref="/data/Favourite cheese">
-      <label ref="jr:itext('/data/Favourite cheese:label')"/>
-      <hint ref="jr:itext('/data/Favourite cheese:hint')"/>
+    <select1 ref="/data/favourite_cheese">
+      <label ref="jr:itext('/data/favourite_cheese:label')"/>
+      <hint ref="jr:itext('/data/favourite_cheese:hint')"/>
       <item>
-        <label ref="jr:itext('/data/Favourite cheese:option0')"/>
+        <label ref="jr:itext('/data/favourite_cheese:option0')"/>
         <value>gouda</value>
       </item>
       <item>
-        <label ref="jr:itext('/data/Favourite cheese:option1')"/>
+        <label ref="jr:itext('/data/favourite_cheese:option1')"/>
         <value>cheddar</value>
       </item>
     </select1>
