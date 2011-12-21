@@ -1,8 +1,8 @@
 """Test for vodka.itext."""
 
 import unittest
-from xml.etree import ElementTree
 
+from vodka.methanol import fromstring
 from vodka.itext import IText, UnknownLanguage, UnknownReference, RefParseError
 
 
@@ -31,7 +31,7 @@ EXAMPLE1 = """
 class TestXFormsIText(unittest.TestCase):
 
     def mk_itext(self, xml):
-        elem = ElementTree.fromstring(xml)
+        elem = fromstring(xml)
         return IText(elem)
 
     def test_simple_translation(self):
