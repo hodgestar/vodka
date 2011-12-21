@@ -50,6 +50,11 @@ class TestOdkForm(unittest.TestCase):
         odk = OdkForm(EXAMPLE1)
         first_input = odk.inputs[0]
         self.assertEqual(first_input.ref, '/data/Name')
+        self.assertEqual('Joe Blogs',
+                         odk.model.instance.find('/data/Name').text.strip())
+        translator = odk.model.itext.translator('eng')
+        self.assertEqual(translator("jr:itext('/data/Name:label')"),
+                         "Enter your full name")
 
     def test_create_form_from_fileobj(self):
         fileobj = StringIO(EXAMPLE1)
