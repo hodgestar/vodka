@@ -47,6 +47,10 @@ class IText(object):
                 lookup[xid] = value
             self.translations[lang] = lookup
 
+    def languages(self):
+        """Return a list of supported languages."""
+        return sorted(self.translations.keys())
+
     def translator(self, lang):
         """Return a function that translates references.
 

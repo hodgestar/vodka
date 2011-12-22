@@ -64,3 +64,7 @@ class TestXFormsIText(unittest.TestCase):
     def test_unsupported_ref(self):
         itext = self.mk_itext(EXAMPLE1)
         self.assertRaises(RefParseError, itext.translation, "eng", "bad:ref")
+
+    def test_languages(self):
+        itext = self.mk_itext(EXAMPLE1)
+        self.assertEqual(itext.languages(), ["afr", "eng"])
