@@ -53,7 +53,7 @@ class FormHandler(object):
             "shown_before": self.shown_before,
             "input_idx": self.input_idx,
             })
-        session_manager.save(self.user_id, session)
+        session_manager.save_session(self.user_id, session)
 
     def choose(self, response, choices):
         """Return a choice from a list of strings.
@@ -125,10 +125,14 @@ class SingleFormWorker(ApplicationWorker):
 
         yield super(SingleFormWorker, self).startWorker()
 
+    def stopWorker(self):
+        self.session_manager.stop()
+
     def load_or_create_session(self, user_id):
         session = self.session_manager.load_session(user_id)
         if not session:
             session = self.session_manager.create_session(user_id)
+        return session
 
     def consume_user_message(self, msg):
         user_id = msg.user()
