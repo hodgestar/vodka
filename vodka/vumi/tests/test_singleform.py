@@ -1,11 +1,13 @@
 """Tests for vodka.vumi.singleform."""
 
+import json
+
 from unittest import TestCase as UnittestTestCase
 from pkg_resources import resource_stream, resource_filename
 
 from twisted.internet.defer import inlineCallbacks
 
-from vumi.tests.utils import FakeRedis, get_stubbed_worker
+from vumi.tests.utils import FakeRedis
 from vumi.application import SessionManager
 from vumi.application.tests.test_base import ApplicationTestCase
 
@@ -106,6 +108,13 @@ class TestFormHandler(UnittestTestCase):
                 "lang": "eng",
                 "input_idx": 2,
                 "shown_before": True,
+                "instance": json.dumps({
+                    'data': {
+                        'cell_number': None,
+                        'favourite_cheese': None,
+                        'name': '\n            Joe Blogs\n          ',
+                        },
+                    }),
                 },
             })
 
@@ -148,30 +157,55 @@ class TestSingleFormWorker(ApplicationTestCase):
             "input_idx": 0,
             "state": FormHandler.STATE_NEW,
             "shown_before": True,
+            "instance": json.dumps({
+                'data': {
+                    'cell_number': None,
+                    'favourite_cheese': None,
+                    'name': '\n            Joe Blogs\n          ',
+                    },
+                }),
             })
 
     @inlineCallbacks
     def test_consume_with_existing_session(self):
         self.worker.session_manager.save_session("+1234", {
             "created_at": 123,
-            # give input_idx non-default value so we can be
-            # sure its been overridden
+            "lang": "eng",
             "input_idx": 1,
-            "state": FormHandler.STATE_NEW,
+            "state": FormHandler.STATE_QUESTION,
             "shown_before": True,
+            "instance": json.dumps({
+                'data': {
+                    'cell_number': None,
+                    'favourite_cheese': None,
+                    'name': 'Random User',
+                    },
+                }),
             })
-        msg = self.mkmsg_in(from_addr="+1234", content="1")
+        msg = self.mkmsg_in(from_addr="+1234", content="+78156")
         yield self.dispatch(msg)
 
         [reply] = self.get_dispatched_messages()
-        self.assertEqual(reply["content"], "Enter your full name")
+        self.assertEqual(reply["content"],
+                         "Select your favourite cheese\n"
+                         "1. Gouda\n"
+                         "2. Cheddar")
         self.assertEqual(reply["session_event"], None)
 
         session = self.worker.session_manager.load_session("+1234")
         self.assertEqual(session, {
             "created_at": 123,
             "lang": "eng",
-            "input_idx": 0,
+            "input_idx": 2,
             "state": FormHandler.STATE_QUESTION,
             "shown_before": True,
+            "instance": json.dumps({
+                'data': {
+                    # Note: the cell_number field is bound to type int
+                    # in the example form, hence the conversion
+                    'cell_number': 78156,
+                    'favourite_cheese': None,
+                    'name': 'Random User',
+                    },
+                }),
             })

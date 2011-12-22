@@ -52,6 +52,7 @@ class FormHandler(object):
             "state": self.state,
             "shown_before": self.shown_before,
             "input_idx": self.input_idx,
+            "instance": json.dumps(self.instance.to_dict()),
             })
         session_manager.save_session(self.user_id, session)
 
