@@ -1,0 +1,69 @@
+<h:html xmlns="http://www.w3.org/2002/xforms" xmlns:h="http://www.w3.org/1999/xhtml" xmlns:ev="http://www.w3.org/2001/xml-events" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa">
+  <h:head>
+    <h:title>Example Vodka Form</h:title>
+    <model>
+      <instance>
+        <data id="build_Untitled-Form_1323432952">
+          <name>
+            Joe Blogs
+          </name>
+          <cell_number/>
+          <favourite_cheese/>
+        </data>
+      </instance>
+      <itext>
+        <translation lang="eng">
+          <text id="/data/name:label">
+            <value>Enter your full name</value>
+          </text>
+          <text id="/data/name:hint">
+            <value/>
+          </text>
+          <text id="/data/cell_number:label">
+            <value>Enter your phone number</value>
+          </text>
+          <text id="/data/cell_number:hint">
+            <value/>
+          </text>
+          <text id="/data/favourite_cheese:label">
+            <value>Select your favourite cheese</value>
+          </text>
+          <text id="/data/favourite_cheese:hint">
+            <value/>
+          </text>
+          <text id="/data/favourite_cheese:option0">
+            <value>Gouda</value>
+          </text>
+          <text id="/data/favourite_cheese:option1">
+            <value>Cheddar</value>
+          </text>
+        </translation>
+      </itext>
+      <bind nodeset="/data/name" type="string" required="true()"/>
+      <bind nodeset="/data/cell_number" type="int"/>
+      <bind nodeset="/data/favourite_cheese" type="select1"/>
+    </model>
+  </h:head>
+  <h:body>
+    <input ref="/data/name">
+      <label ref="jr:itext('/data/name:label')"/>
+      <hint ref="jr:itext('/data/name:hint')"/>
+    </input>
+    <input ref="/data/cell_number">
+      <label ref="jr:itext('/data/cell_number:label')"/>
+      <hint ref="jr:itext('/data/cell_number:hint')"/>
+    </input>
+    <select1 ref="/data/favourite_cheese">
+      <label ref="jr:itext('/data/favourite_cheese:label')"/>
+      <hint ref="jr:itext('/data/favourite_cheese:hint')"/>
+      <item>
+        <label ref="jr:itext('/data/favourite_cheese:option0')"/>
+        <value>gouda</value>
+      </item>
+      <item>
+        <label ref="jr:itext('/data/favourite_cheese:option1')"/>
+        <value>cheddar</value>
+      </item>
+    </select1>
+  </h:body>
+</h:html>
