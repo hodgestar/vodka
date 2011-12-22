@@ -1,2 +1,2 @@
 # extra requirements
-git+git@github.com:praekelt/vumi@develop#egg=vumi
+-e git+git@github.com:praekelt/vumi@develop#egg=vumi
