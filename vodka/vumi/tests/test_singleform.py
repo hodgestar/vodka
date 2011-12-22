@@ -79,3 +79,29 @@ class TestFormHandler(TestCase):
         self.assertEqual(handler.state, handler.STATE_DONE)
         self.assertEqual(handler.shown_before, True)
         self.assertEqual(handler.input_idx, 0)
+
+    def test_save(self):
+
+        class DummyManager(object):
+            saves = {}
+
+            def save(self, user_id, session):
+                self.saves[user_id] = session
+
+        handler = self.mk_handler("user1", {
+            "state": FormHandler.STATE_QUESTION,
+            "lang": "eng",
+            "input_idx": 2,
+            "shown_before": True,
+            })
+        handler.save({"created_at": "123"}, DummyManager())
+
+        self.assertEqual(DummyManager.saves, {
+            "user1": {
+                "created_at": "123",
+                "state": FormHandler.STATE_QUESTION,
+                "lang": "eng",
+                "input_idx": 2,
+                "shown_before": True,
+                },
+            })
