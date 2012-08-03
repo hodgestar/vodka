@@ -19,8 +19,11 @@ class OdkForm(object):
     """
 
     def __init__(self, source):
-        doc = fromanything(source)
-        self.title = doc.findtext("%s/%s" % (html.head, html.title))
-        self.model = XFormsModel(doc.find("*/" + xforms.model))
-        self.inputs = [XFormsInput.from_element(elem)
-                       for elem in doc.find(html.body)]
+        self._doc = fromanything(source)
+        self.title = self._doc.findtext("%s/%s" % (html.head, html.title))
+        self._model_elem = self._doc.find("*/" + xforms.model)
+        self.model = XFormsModel(self._model_elem)
+
+    def get_inputs(self, instance):
+        return [XFormsInput.from_element(instance, self._model_elem, elem)
+                for elem in self._doc.find(html.body)]

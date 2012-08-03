@@ -49,7 +49,7 @@ class TestOdkForm(unittest.TestCase):
     def test_create_form_from_string(self):
         odk = OdkForm(EXAMPLE1)
         self.assertEqual(odk.title, "Untitled Form")
-        first_input = odk.inputs[0]
+        first_input = odk.get_inputs(None)[0]
         self.assertEqual(first_input.ref, '/data/Name')
         translator = odk.model.itext.translator('eng')
         self.assertEqual(translator("jr:itext('/data/Name:label')"),
@@ -58,5 +58,5 @@ class TestOdkForm(unittest.TestCase):
     def test_create_form_from_fileobj(self):
         fileobj = StringIO(EXAMPLE1)
         odk = OdkForm(fileobj)
-        first_input = odk.inputs[0]
+        first_input = odk.get_inputs(None)[0]
         self.assertEqual(first_input.ref, '/data/Name')

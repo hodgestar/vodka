@@ -28,6 +28,8 @@ Example itext section::
 
 import re
 
+from methanol import xforms
+
 
 class IText(object):
     """
@@ -35,6 +37,7 @@ class IText(object):
     """
 
     JR_ITEXT = re.compile(r"jr:itext\(['\"](?P<id>.*)['\"]\)")
+    JR_ITEXT_REF = re.compile(r"jr:itext\((?P<path>.*)\)")
 
     def __init__(self, elem):
         self.translations = {}
@@ -59,19 +62,25 @@ class IText(object):
         if lang not in self.translations:
             raise UnknownLanguage("Unknown language: %r" % lang)
 
-        def translation(ref):
-            return self.translation(lang, ref)
+        def translation(ref, elem=None):
+            return self.translation(lang, ref, elem)
         return translation
 
-    def translation(self, lang, ref):
+    def translation(self, lang, ref, elem=None):
         """Return a translation string for the given language and reference."""
+        # First try a direct translation lookup.
         match = self.JR_ITEXT.match(ref)
-        if not match:
-            raise RefParseError("Can't handle ref: %r" % ref)
+        if match:
+            xid = match.group('id')
+        else:
+            # Then try an indirect translation lookup.
+            match = self.JR_ITEXT_REF.match(ref)
+            if not match:
+                raise RefParseError("Can't handle ref: %r" % ref)
+            xid = elem.findtext(getattr(xforms, match.group('path')))
         lookup = self.translations.get(lang)
         if lookup is None:
             raise UnknownLanguage("Unknown language: %r" % lang)
-        xid = match.group('id')
         if xid not in lookup:
             raise UnknownReference("Unknown reference (language %r): %r"
                                    % (lang, ref))

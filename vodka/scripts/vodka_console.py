@@ -25,7 +25,7 @@ def main(options, args):
     print "Running '%s' [language: %s]" % (form.title, options.lang)
     print "----"
 
-    for xinput in form.inputs:
+    for xinput in form.get_inputs(instance):
         print renderer.render(xinput)
         response = raw_input("> ")
         response = renderer.parse(xinput, response)

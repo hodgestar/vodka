@@ -68,14 +68,14 @@ class TestSimpleTextRenderer(unittest.TestCase):
         self.renderer = SimpleTextRenderer(translator)
 
     def test_input(self):
-        inp = InputInput(fromstring(INPUT))
+        inp = InputInput(None, None, fromstring(INPUT))
         self.assertEqual(self.renderer.render(inp),
                          "Enter your full name")
         self.assertEqual(self.renderer.parse(inp, "a response"),
                          "a response")
 
     def test_select1(self):
-        select = Select1Input(fromstring(SELECT1))
+        select = Select1Input(None, None, fromstring(SELECT1))
         self.assertEqual(self.renderer.render(select),
                          "Select your favourite cheese\n1. Gouda\n2. Cheddar")
         self.assertEqual(self.renderer.parse(select, "1"),

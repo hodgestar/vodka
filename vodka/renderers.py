@@ -48,8 +48,8 @@ class SimpleTextRenderer(FormRenderer):
     """Renders inputs to simple text."""
 
     def render_default(self, input):
-        text = self.translator(input.label_ref)
-        hint = self.translator(input.hint_ref)
+        text = input.get_label(self.translator)
+        hint = input.get_hint(self.translator)
         if hint:
             return "%s\n  Hint: %s" % (text, hint)
         else:
@@ -60,10 +60,10 @@ class SimpleTextRenderer(FormRenderer):
 
     def render_select1(self, input):
         lines = [self.render_default(input)]
-        for i, item in enumerate(input.items):
-            lines.append("%d. %s" % (i + 1, self.translator(item.label_ref)))
+        for i, item in enumerate(input.get_items()):
+            lines.append("%d. %s" % (i + 1, item.get_label(self.translator)))
         return "\n".join(lines)
 
     def parse_select1(self, input, response):
         i = int(response) - 1
-        return input.items[i].value
+        return input.get_items()[i].get_value(self.translator)
