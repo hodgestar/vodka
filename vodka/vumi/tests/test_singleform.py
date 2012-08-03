@@ -100,6 +100,89 @@ class TestFormHandler(ApplicationTestCase):
                 })
 
 
+class TestFormHandlerCascadingSelect(ApplicationTestCase):
+    def setUp(self):
+        super(TestFormHandlerCascadingSelect, self).setUp()
+        self.xform = OdkForm(resource_stream("vodka.tests",
+                                             "new_cascading_select.xml"))
+
+    def mk_handler(self, user_id, session):
+        return FormHandler(user_id, self.xform, session)
+
+    def test_interact_new(self):
+        handler = self.mk_handler("user1", {})
+        reply, continue_session = handler.interact(None)
+        self.assertEqual(reply, "cascading select test\n"
+                         "Please select a language:\n"
+                         "1. default")
+        self.assertTrue(continue_session)
+        self.assertEqual(handler.state, handler.STATE_NEW)
+        self.assertEqual(handler.shown_before, True)
+
+    def test_select_lang(self):
+        handler = self.mk_handler("user1", {"shown_before": True})
+        reply, continue_session = handler.interact("1")
+        self.assertEqual(
+            reply, "Please select a State\n1. Texas\n2. Washington")
+        self.assertTrue(continue_session)
+        self.assertEqual(handler.state, handler.STATE_QUESTION)
+        self.assertEqual(handler.shown_before, True)
+        self.assertEqual(handler.input_idx, 0)
+
+    def test_fail_to_select_lang(self):
+        handler = self.mk_handler("user1", {"shown_before": True})
+        reply, continue_session = handler.interact("2")
+        self.assertEqual(reply, "Invalid language. Please select a language:\n"
+                         "1. default")
+        self.assertTrue(continue_session)
+        self.assertEqual(handler.state, handler.STATE_NEW)
+        self.assertEqual(handler.shown_before, True)
+
+    def test_answer_question(self):
+        handler = self.mk_handler("user1", {
+            "state": FormHandler.STATE_QUESTION,
+            "lang": "default",
+            "input_idx": 0,
+            "shown_before": True,
+            })
+        reply, continue_session = handler.interact("1")
+        self.assertEqual(reply,
+                         "Please select a County in the State\n"
+                         "1. King\n"
+                         "2. Cameron")
+        self.assertTrue(continue_session)
+        self.assertEqual(handler.state, handler.STATE_QUESTION)
+        self.assertEqual(handler.shown_before, True)
+        self.assertEqual(handler.input_idx, 1)
+
+    def test_answer_all_questions(self):
+        handler = self.mk_handler("user1", {
+            "state": FormHandler.STATE_QUESTION,
+            "lang": "default",
+            "input_idx": 0,
+            "shown_before": True,
+            })
+
+        reply, continue_session = handler.interact("1")
+        self.assertEqual(reply,
+                         "Please select a County in the State\n"
+                         "1. King\n"
+                         "2. Cameron")
+
+        reply, continue_session = handler.interact("2")
+        self.assertEqual(reply,
+                         "Please select a City in the County\n"
+                         "1. brownsville\n"
+                         "2. harlingen")
+
+        reply, continue_session = handler.interact("1")
+        self.assertEqual(reply, "Survey complete. Goodbye.")
+        self.assertFalse(continue_session)
+        self.assertEqual(handler.state, handler.STATE_DONE)
+        self.assertEqual(handler.shown_before, True)
+        self.assertEqual(handler.input_idx, 0)
+
+
 class TestSingleFormWorker(ApplicationTestCase):
 
     timeout = 3
