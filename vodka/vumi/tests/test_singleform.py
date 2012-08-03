@@ -1,30 +1,20 @@
 """Tests for vodka.vumi.singleform."""
 
-import json
-
-from unittest import TestCase as UnittestTestCase
 from pkg_resources import resource_stream, resource_filename
 
 from twisted.internet.defer import inlineCallbacks
 
-from vumi.tests.utils import FakeRedis
-from vumi.application import SessionManager
 from vumi.application.tests.test_base import ApplicationTestCase
 
 from vodka.vumi.singleform import FormHandler, SingleFormWorker
 from vodka.xforms import OdkForm
 
 
-class TestFormHandler(UnittestTestCase):
+class TestFormHandler(ApplicationTestCase):
     def setUp(self):
-        self.sm = SessionManager(db=0, prefix="test")
-        self.sm.r_server = FakeRedis()  # setup fake redis
+        super(TestFormHandler, self).setUp()
         self.xform = OdkForm(resource_stream("vodka.tests",
                                              "example-form.xml"))
-
-    def tearDown(self):
-        self.sm.stop()
-        self.sm.r_server.teardown()  # teardown fake redis
 
     def mk_handler(self, user_id, session):
         return FormHandler(user_id, self.xform, session)
@@ -86,37 +76,28 @@ class TestFormHandler(UnittestTestCase):
         self.assertEqual(handler.input_idx, 0)
 
     def test_save(self):
-
-        class DummyManager(object):
-            saves = {}
-
-            def save_session(self, user_id, session):
-                self.saves[user_id] = session
-
         handler = self.mk_handler("user1", {
             "state": FormHandler.STATE_QUESTION,
             "lang": "eng",
             "input_idx": 2,
             "shown_before": True,
             })
-        handler.save({"created_at": "123"}, DummyManager())
+        session = handler.export({"created_at": "123"})
 
-        self.assertEqual(DummyManager.saves, {
-            "user1": {
+        self.assertEqual(session, {
                 "created_at": "123",
                 "state": FormHandler.STATE_QUESTION,
                 "lang": "eng",
                 "input_idx": 2,
                 "shown_before": True,
-                "instance": json.dumps({
+                "instance": {
                     'data': {
                         'cell_number': None,
                         'favourite_cheese': None,
                         'name': '\n            Joe Blogs\n          ',
                         },
-                    }),
-                },
-            })
+                    },
+                })
 
 
 class TestSingleFormWorker(ApplicationTestCase):
@@ -132,11 +113,6 @@ class TestSingleFormWorker(ApplicationTestCase):
                 'xform': resource_filename("vodka.tests",
                                            "example-form.xml"),
                 })
-        self.worker.session_manager.r_server = FakeRedis()  # stub out redis
-
-    def tearDown(self):
-        super(TestSingleFormWorker, self).tearDown()
-        self.worker.session_manager.r_server.teardown()  # teardown fake redis
 
     @inlineCallbacks
     def test_consume_and_create_session(self):
@@ -150,37 +126,37 @@ class TestSingleFormWorker(ApplicationTestCase):
                          "1. eng")
         self.assertEqual(reply["session_event"], None)
 
-        session = self.worker.session_manager.load_session("+1234")
+        session = yield self.worker.load_or_create_session("+1234")
         session.pop("created_at")
         self.assertEqual(session, {
             "lang": None,
             "input_idx": 0,
             "state": FormHandler.STATE_NEW,
             "shown_before": True,
-            "instance": json.dumps({
+            "instance": {
                 'data': {
                     'cell_number': None,
                     'favourite_cheese': None,
                     'name': '\n            Joe Blogs\n          ',
                     },
-                }),
+                },
             })
 
     @inlineCallbacks
     def test_consume_with_existing_session(self):
-        self.worker.session_manager.save_session("+1234", {
+        yield self.worker.save_session("+1234", {
             "created_at": 123,
             "lang": "eng",
             "input_idx": 1,
             "state": FormHandler.STATE_QUESTION,
             "shown_before": True,
-            "instance": json.dumps({
+            "instance": {
                 'data': {
                     'cell_number': None,
                     'favourite_cheese': None,
                     'name': 'Random User',
                     },
-                }),
+                },
             })
         msg = self.mkmsg_in(from_addr="+1234", content="+78156")
         yield self.dispatch(msg)
@@ -192,14 +168,14 @@ class TestSingleFormWorker(ApplicationTestCase):
                          "2. Cheddar")
         self.assertEqual(reply["session_event"], None)
 
-        session = self.worker.session_manager.load_session("+1234")
+        session = yield self.worker.load_or_create_session("+1234")
         self.assertEqual(session, {
             "created_at": 123,
             "lang": "eng",
             "input_idx": 2,
             "state": FormHandler.STATE_QUESTION,
             "shown_before": True,
-            "instance": json.dumps({
+            "instance": {
                 'data': {
                     # Note: the cell_number field is bound to type int
                     # in the example form, hence the conversion
@@ -207,5 +183,5 @@ class TestSingleFormWorker(ApplicationTestCase):
                     'favourite_cheese': None,
                     'name': 'Random User',
                     },
-                }),
+                },
             })

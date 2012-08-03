@@ -6,10 +6,10 @@ Vumi ApplicationWorker that serves a single form.
 
 import json
 
-from twisted.internet.defer import inlineCallbacks
+from twisted.internet.defer import inlineCallbacks, returnValue
 
-from vumi.application import ApplicationWorker, SessionManager
-from vumi.utils import get_deploy_int
+from vumi.application import ApplicationWorker
+from vumi.components.session import SessionManager
 
 from vodka.xforms import OdkForm
 from vodka.renderers import SimpleTextRenderer
@@ -29,14 +29,11 @@ class FormHandler(object):
         self.state = session.get("state", self.STATE_NEW)
         self.shown_before = session.get("shown_before", False)
         self.input_idx = session.get("input_idx", 0)
-        if "instance" in session:
-            data = json.loads(session.get("instance"))
-        else:
-            data = None
+        data = session.get("instance")
         self.instance = self.xform.model.get_instance(data)
 
     def set_question(self, input_idx):
-        if 0 <= input_idx < len(self.xform.inputs):
+        if 0 <= input_idx < len(self.xform.get_inputs(self.instance)):
             self.state = self.STATE_QUESTION
             self.shown_before = False
             self.input_idx = input_idx
@@ -45,16 +42,15 @@ class FormHandler(object):
             self.shown_before = False
             self.input_idx = 0
 
-    def save(self, session, session_manager):
-        """Save the session state."""
-        session.update({
+    def export(self, session):
+        """Export the session state."""
+        return dict(session, **{
             "lang": self.lang,
             "state": self.state,
             "shown_before": self.shown_before,
             "input_idx": self.input_idx,
-            "instance": json.dumps(self.instance.to_dict()),
+            "instance": self.instance.to_dict(),
             })
-        session_manager.save_session(self.user_id, session)
 
     def choose(self, response, choices):
         """Return a choice from a list of strings.
@@ -88,7 +84,7 @@ class FormHandler(object):
         return "\n".join(lines), True
 
     def interact_question(self, response):
-        xinput = self.xform.inputs[self.input_idx]
+        xinput = self.xform.get_inputs(self.instance)[self.input_idx]
         translator = self.xform.model.itext.translator(self.lang)
         renderer = SimpleTextRenderer(translator)
         if self.shown_before:
@@ -119,26 +115,32 @@ class SingleFormWorker(ApplicationWorker):
         with open(self.config["xform"], "rb") as xform_file:
             self.xform = OdkForm(xform_file)
 
-        self.session_manager = SessionManager(
-            get_deploy_int(self._amqp_client.vhost),
+        self.session_manager = yield SessionManager.from_redis_config(
+            self.config.get('redis_manager'),
             "%(worker_name)s:%(transport_name)s" % self.config,
             max_session_length=self.MAX_SESSION_LENGTH)
 
         yield super(SingleFormWorker, self).startWorker()
 
     def stopWorker(self):
-        self.session_manager.stop()
+        return self.session_manager.stop()
 
+    @inlineCallbacks
     def load_or_create_session(self, user_id):
-        session = self.session_manager.load_session(user_id)
+        session = yield self.session_manager.load_session(user_id)
         if not session:
-            session = self.session_manager.create_session(user_id)
-        return session
+            session = yield self.session_manager.create_session(user_id)
+        returnValue(dict((k, json.loads(v)) for k, v in session.items()))
 
+    def save_session(self, user_id, session):
+        return self.session_manager.save_session(user_id, dict(
+                (k, json.dumps(v)) for k, v in session.items()))
+
+    @inlineCallbacks
     def consume_user_message(self, msg):
         user_id = msg.user()
-        session = self.load_or_create_session(user_id)
+        session = yield self.load_or_create_session(user_id)
         handler = FormHandler(user_id, self.xform, session)
         reply, continue_session = handler.interact(msg['content'])
-        handler.save(session, self.session_manager)
-        self.reply_to(msg, reply, continue_session=continue_session)
+        yield self.save_session(user_id, handler.export(session))
+        yield self.reply_to(msg, reply, continue_session=continue_session)
